@@ -1,46 +1,48 @@
 class Solution {
+    private int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    
     public int trapRainWater(int[][] heightMap) {
-          if (heightMap == null || heightMap.length == 0 || heightMap[0].length == 0) {
-            return 0;
+        if (heightMap == null || heightMap.length == 0) return 0;
+        
+        int rows = heightMap.length;
+        int cols = heightMap[0].length;
+        
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+        boolean[][] visited = new boolean[rows][cols];
+        
+        for (int row = 0; row < rows; row++) {
+            minHeap.offer(new int[]{heightMap[row][0], row, 0});
+            minHeap.offer(new int[]{heightMap[row][cols - 1], row, cols - 1});
+            visited[row][0] = visited[row][cols - 1] = true;
         }
         
-        int m = heightMap.length;
-        int n = heightMap[0].length;
-        boolean[][] visited = new boolean[m][n];
-        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a[2]));
-        
-       
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i == 0 || i == m - 1 || j == 0 || j == n - 1) {
-                    pq.offer(new int[]{i, j, heightMap[i][j]});
-                    visited[i][j] = true;
-                }
-            }
+        for (int col = 1; col < cols - 1; col++) {
+            minHeap.offer(new int[]{heightMap[0][col], 0, col});
+            minHeap.offer(new int[]{heightMap[rows - 1][col], rows - 1, col});
+            visited[0][col] = visited[rows - 1][col] = true;
         }
         
-        int ans = 0;
-        int[][] direc = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+        int totalWater = 0;
         
-        while (!pq.isEmpty()) {
-            int[] cell = pq.poll();
-            int row = cell[0], col = cell[1], height = cell[2];
+        while (!minHeap.isEmpty()) {
+            int[] cell = minHeap.poll();
+            int height = cell[0], row = cell[1], col = cell[2];
             
-            for (int[] dir : direc) {
-                int r = row + dir[0];
-                int c = col + dir[1];
+            for (int[] dir : directions) {
+                int newRow = row + dir[0];
+                int newCol = col + dir[1];
                 
-                if (r >= 0 && r < m && c >= 0 && c < n && !visited[r][c]) {
-                    visited[r][c] = true;
+                if (newRow >= 0 && newRow < rows && 
+                    newCol >= 0 && newCol < cols && 
+                    !visited[newRow][newCol]) {
                     
-                    ans += Math.max(0, height - heightMap[r][c]);
-                    
-                    pq.offer(new int[]{r, c, Math.max(heightMap[r][c], height)});
+                    totalWater += Math.max(0, height - heightMap[newRow][newCol]);
+                    minHeap.offer(new int[]{Math.max(height, heightMap[newRow][newCol]), newRow, newCol});
+                    visited[newRow][newCol] = true;
                 }
             }
         }
-        return ans;
+        
+        return totalWater;
     }
 }
-
-
