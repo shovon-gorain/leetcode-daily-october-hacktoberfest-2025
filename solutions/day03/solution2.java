@@ -1,4 +1,4 @@
-public class solution2 {
+class solution2 {
     public int trapRainWater(int[][] heightMap) {
         int m = heightMap.length;
         int n = heightMap[0].length;
@@ -39,6 +39,5 @@ public class solution2 {
         }
         return res;
     }
-} {
-    
 }
+} 
