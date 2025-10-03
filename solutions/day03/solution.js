@@ -66,9 +66,9 @@ class MinHeap {
     }
 }
 
-function trapRainWater(elevationMap) {
-    const rows = elevationMap.length;
-    const cols = elevationMap[0].length;
+function trapRainWater(heightMap) {
+    const rows = heightMap.length;
+    const cols = heightMap[0].length;
 
     if (rows <= 2 || cols <= 2) return 0;
 
@@ -76,14 +76,14 @@ function trapRainWater(elevationMap) {
     const minHeap = new MinHeap();
 
     for (let row = 0; row < rows; row++) {
-        minHeap.push([elevationMap[row][0], row, 0]);
-        minHeap.push([elevationMap[row][cols - 1], row, cols - 1]);
+        minHeap.push([heightMap[row][0], row, 0]);
+        minHeap.push([heightMap[row][cols - 1], row, cols - 1]);
         visited[row][0] = true;
         visited[row][cols - 1] = true;
     }
     for (let col = 1; col < cols - 1; col++) {
-        minHeap.push([elevationMap[0][col], 0, col]);
-        minHeap.push([elevationMap[rows - 1][col], rows - 1, col]);
+        minHeap.push([heightMap[0][col], 0, col]);
+        minHeap.push([heightMap[rows - 1][col], rows - 1, col]);
         visited[0][col] = true;
         visited[rows - 1][col] = true;
     }
@@ -95,10 +95,10 @@ function trapRainWater(elevationMap) {
         [0, -1]   
     ];
 
-    let totalWater = 0;
+    let waterTrapped = 0;
 
     while (minHeap.size() > 0) {
-        const [boundaryHeight, row, col] = minHeap.pop();
+        const [currentHeight, row, col] = minHeap.pop();
 
         for (const [dRow, dCol] of directions) {
             const neighborRow = row + dRow;
@@ -110,24 +110,24 @@ function trapRainWater(elevationMap) {
                 !visited[neighborRow][neighborCol]
             ) {
                 visited[neighborRow][neighborCol] = true;
-                totalWater += Math.max(0, boundaryHeight - elevationMap[neighborRow][neighborCol]);                minHeap.push([
-                    Math.max(boundaryHeight, elevationMap[neighborRow][neighborCol]),
+                waterTrapped += Math.max(0, currentHeight - heightMap[neighborRow][neighborCol]);                minHeap.push([
+                    Math.max(currentHeight, heightMap[neighborRow][neighborCol]),
                     neighborRow,
                     neighborCol ])
             }
         }
     }
-    return totalWater;
+    return waterTrapped;
 }
 
 // Sample Input Case
-const elevationMap = [
+const heightMap = [
     [1, 4, 3, 1, 3, 2],
     [3, 2, 1, 3, 2, 4],
     [2, 3, 3, 2, 3, 1]
 ];
 
-console.log("Total water trapped:", trapRainWater(elevationMap)); // Output: 4
+console.log("Total water trapped:", trapRainWater(heightMap)); // Output: 4
 
 /*
 Examples
