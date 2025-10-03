@@ -18,116 +18,88 @@ n == heightMap[i].length
 0 <= heightMap[i][j] <= 2 * 104
 */
 
-class MinHeap {
-    constructor() {
-        this.heap = [];
-    }
+/**
+ * @param {number[][]} heightMap
+ * @return {number}
+ */
+var trapRainWater = function(heightMap) {
+    const m = heightMap.length;
+    const n = heightMap[0].length;
+    
+    if (m <= 2 || n <= 2) return 0;
 
-    push(cell) {
-        this.heap.push(cell);
-        this.bubbleUp(this.heap.length - 1);
-    }
+    const visited = Array.from({ length: m }, () => Array(n).fill(false));
+    const heap = [];
 
-    pop() {
-        if (this.heap.length === 1) return this.heap.pop();
-        const top = this.heap[0];
-        this.heap[0] = this.heap.pop();
-        this.bubbleDown(0);
-        return top;
-    }
-
-    bubbleUp(index) {
-        while (index > 0) {
-            const parent = Math.floor((index - 1) / 2);
-            if (this.heap[parent][0] <= this.heap[index][0]) break;
-            [this.heap[parent], this.heap[index]] = [this.heap[index], this.heap[parent]];
-            index = parent;
+    const push = (cell) => {
+        heap.push(cell);
+        let i = heap.length - 1;
+        while (i > 0) {
+            const parent = Math.floor((i - 1) / 2);
+            if (heap[parent][0] <= heap[i][0]) break;
+            [heap[parent], heap[i]] = [heap[i], heap[parent]];
+            i = parent;
         }
-    }
+    };
 
-    bubbleDown(index) {
-        const n = this.heap.length;
+    const pop = () => {
+        if (heap.length === 1) return heap.pop();
+        const top = heap[0];
+        heap[0] = heap.pop();
+        let i = 0;
         while (true) {
-            let smallest = index;
-            const left = 2 * index + 1;
-            const right = 2 * index + 2;
-
-            if (left < n && this.heap[left][0] < this.heap[smallest][0]) smallest = left;
-            if (right < n && this.heap[right][0] < this.heap[smallest][0]) smallest = right;
-            if (smallest === index) break;
-
-            [this.heap[smallest], this.heap[index]] = [this.heap[index], this.heap[smallest]];
-            index = smallest;
+            let smallest = i;
+            const left = 2 * i + 1;
+            const right = 2 * i + 2;
+            if (left < heap.length && heap[left][0] < heap[smallest][0]) smallest = left;
+            if (right < heap.length && heap[right][0] < heap[smallest][0]) smallest = right;
+            if (smallest === i) break;
+            [heap[i], heap[smallest]] = [heap[smallest], heap[i]];
+            i = smallest;
         }
+        return top;
+    };
+
+    for (let i = 0; i < m; i++) {
+        push([heightMap[i][0], i, 0]);
+        push([heightMap[i][n - 1], i, n - 1]);
+        visited[i][0] = true;
+        visited[i][n - 1] = true;
+    }
+    for (let j = 1; j < n - 1; j++) {
+        push([heightMap[0][j], 0, j]);
+        push([heightMap[m - 1][j], m - 1, j]);
+        visited[0][j] = true;
+        visited[m - 1][j] = true;
     }
 
-    size() {
-        return this.heap.length;
-    }
-}
+    const dirs = [[1,0], [-1,0], [0,1], [0,-1]];
+    let water = 0;
 
-function trapRainWater(heightMap) {
-    const rows = heightMap.length;
-    const cols = heightMap[0].length;
-
-    if (rows <= 2 || cols <= 2) return 0;
-
-    const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-    const minHeap = new MinHeap();
-
-    for (let row = 0; row < rows; row++) {
-        minHeap.push([heightMap[row][0], row, 0]);
-        minHeap.push([heightMap[row][cols - 1], row, cols - 1]);
-        visited[row][0] = true;
-        visited[row][cols - 1] = true;
-    }
-    for (let col = 1; col < cols - 1; col++) {
-        minHeap.push([heightMap[0][col], 0, col]);
-        minHeap.push([heightMap[rows - 1][col], rows - 1, col]);
-        visited[0][col] = true;
-        visited[rows - 1][col] = true;
-    }
-
-    const directions = [
-        [1, 0],   
-        [-1, 0], 
-        [0, 1],   
-        [0, -1]   
-    ];
-
-    let waterTrapped = 0;
-
-    while (minHeap.size() > 0) {
-        const [currentHeight, row, col] = minHeap.pop();
-
-        for (const [dRow, dCol] of directions) {
-            const neighborRow = row + dRow;
-            const neighborCol = col + dCol;
-
-            if (
-                neighborRow >= 0 && neighborRow < rows &&
-                neighborCol >= 0 && neighborCol < cols &&
-                !visited[neighborRow][neighborCol]
-            ) {
-                visited[neighborRow][neighborCol] = true;
-                waterTrapped += Math.max(0, currentHeight - heightMap[neighborRow][neighborCol]);                minHeap.push([
-                    Math.max(currentHeight, heightMap[neighborRow][neighborCol]),
-                    neighborRow,
-                    neighborCol ])
+    while (heap.length > 0) {
+        const [h, r, c] = pop();
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < m && nc >= 0 && nc < n && !visited[nr][nc]) {
+                visited[nr][nc] = true;
+                water += Math.max(0, h - heightMap[nr][nc]);
+                push([Math.max(h, heightMap[nr][nc]), nr, nc]);
             }
         }
     }
-    return waterTrapped;
-}
 
-// Sample Input Case
+    return water;
+};
+
+// Sample Input Test Case:
 const heightMap = [
     [1, 4, 3, 1, 3, 2],
     [3, 2, 1, 3, 2, 4],
     [2, 3, 3, 2, 3, 1]
 ];
 
-console.log("Total water trapped:", trapRainWater(heightMap)); // Output: 4
+console.log(trapRainWater(heightMap)); // Output: 4
+
 
 /*
 Examples
