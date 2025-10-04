@@ -6,15 +6,13 @@ Find two lines that together with the x-axis form a container, such that the con
 Return the maximum amount of water a container can store.
 Notice that you may not slant the container.
 
-Optimal Approach (Two Pointers):
-- Use two pointers, one at the beginning and one at the end.
-- Calculate the water area formed by these two lines.
-- Move the pointer pointing to the shorter line inward (since the smaller line limits the height of water).
-- Repeat until both pointers meet.
+Brute Force Approach:
+- Iterate over all possible pairs of lines (i, j) where i < j.
+- For each pair, calculate the water area: (j - i) * min(height[i], height[j])
 - Keep track of the maximum area found.
 
 Complexity Analysis:
-Time Complexity: O(n)
+Time Complexity: O(n^2)
 where n = number of vertical lines, i.e., the length of the input array height
 Space Complexity: O(1)
 
@@ -37,20 +35,17 @@ class Solution(object):
         :type height: List[int]
         :rtype: int
         """
-        left, right = 0, len(height) - 1
+        n = len(height)
         max_area = 0
-
-        while left < right:
-            width = right - left
-            area = width * min(height[left], height[right])
-            max_area = max(max_area, area)
-
-            if height[left] < height[right]:
-                left += 1
-            else:
-                right -= 1
-
+        
+        for i in range(n):
+            for j in range(i + 1, n):
+                width = j - i
+                area = width * min(height[i], height[j])
+                max_area = max(max_area, area)
+        
         return max_area
+
 
 """
 class Solution(object):
@@ -66,46 +61,28 @@ Defines a method maxArea that takes height as input.
 height is a list of integers representing the heights of vertical lines.
 :rtype: int means the function will return an integer — the maximum area of water.
 
-        left, right = 0, len(height) - 1
-Initializes two pointers:
-
-left → points to the first line (index 0).
-right → points to the last line (index len(height) - 1).
-These pointers will move toward each other to check all possible containers.
+        n = len(height)
+Stores the number of vertical lines.
 
         max_area = 0
 max_area stores the maximum water area found so far.
 Initially set to 0 because we haven’t calculated any areas yet.
 
-        while left < right:
-Loop continues until the two pointers meet.
-left < right ensures we always have at least two lines to form a container.
+        for i in range(n):
+            for j in range(i + 1, n):
+Loop through every possible pair of lines (i, j), where i < j.
 
-            width = right - left
-Calculates the width of the container.
-Distance between the two lines is right - left.
+                width = j - i
+Calculates the width of the container formed by lines i and j.
 
-            area = width * min(height[left], height[right])
-Calculates the area of water the current container can hold:
+                area = width * min(height[i], height[j])
+Calculates the area of water the current pair can hold.
 
-Area = width × height of shorter line
-Area = width×height of shorter line
-min(height[left], height[right]) ensures we don’t “overflow” the water beyond the shorter line.
-
-            max_area = max(max_area, area)
+                max_area = max(max_area, area)
 Updates max_area if the current area is bigger than the previous maximum.
-Ensures we always keep track of the largest area found.
-
-            if height[left] < height[right]:
-                left += 1
-            else:
-                right -= 1
-Moves the pointer pointing to the smaller line inward.
-Why? Because the shorter line limits the water height.
-By moving it, we try to find a taller line that can potentially increase the area.
-If the heights are equal, moving either pointer works — here, we move right.
 
         return max_area
-Returns the maximum area found after checking all possibilities.
+Returns the maximum area found after checking all pairs.
 """
+
 
